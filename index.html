@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa de Filmes</title>
+    <style>
+        #film-result {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 200px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pesquisa de Filmes</h1>
+
+    <input type="text" id="movie-title" placeholder="Digite o título do filme" />
+    <button onclick="searchFilm()">Pesquisar</button>
+
+    <div id="film-result">
+        <h2>Detalhes do Filme</h2>
+        <img id="film-image" src="" alt="Imagem do Filme" />
+        <p id="film-title"></p>
+        <p id="film-release-date"></p>
+        <p id="film-vote-average"></p>
+        <p id="film-plot"></p>
+        <p id="film-trailer"></p>
+    </div>
+
+    <script>
+       async function searchFilm() {
+    const title = document.getElementById('movie-title').value;
+    const res = await fetch(`http://localhost:5500/get_film/${encodeURIComponent(title)}`);
+    
+    if (res.ok) {
+        const data = await res.json();
+
+        // Verificando os dados retornados do backend
+        console.log("Dados recebidos do backend:", data);
+        console.log(data.omdb.poster); // Verifique no backend o valor da URL do pôster
+
+        
+        // Exibe os dados do filme
+        document.getElementById('film-image').src = data.omdb.poster !== 'N/A' ? data.omdb.poster : 'https://via.placeholder.com/200';
+        document.getElementById('film-title').textContent = `Título: ${data.tmdb.title}`;
+        document.getElementById('film-plot').textContent = `Resumo: ${data.tmdb.overview}`;
+        document.getElementById('film-release-date').textContent = `Data de Lançamento: ${data.tmdb.release_date}`;
+        document.getElementById('film-vote-average').textContent = `Avaliação: ${data.tmdb.vote_average}`;
+
+        // Exibe o trailer, se disponível
+        const trailerLink = data.tmdb.trailer || "Trailer não disponível";
+        document.getElementById('film-trailer').textContent = `Trailer: ${trailerLink}`;
+    } else {
+        alert("Filme não encontrado!");
+    }
+}
+
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "projeto",
+  "version": "1.0.0",
+  "description": "1. Clone o repositório ou copie os arquivos para um diretório de sua escolha. 2. Abra o arquivo `app/main.py` e substitua `YOUR_OPENWEATHERMAP_API_KEY` e `YOUR_UNSPLASH_ACCESS_KEY` com as suas chaves de API para OpenWeatherMap e Unsplash, respectivamente.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/connect.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.10",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "supabase": "^2.1.1"
+  }
+}
