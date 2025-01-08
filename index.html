@@ -12,53 +12,80 @@
             max-width: 200px;
             margin-top: 10px;
         }
+        iframe {
+            width: 100%;
+            height: 300px;
+        }
     </style>
 </head>
 <body>
     <h1>Pesquisa de Filmes</h1>
 
     <input type="text" id="movie-title" placeholder="Digite o título do filme" />
-    <button onclick="searchFilm()">Pesquisar</button>
+    <button onclick="searchFilm(document.getElementById('movie-title').value)">Pesquisar</button>
 
-    <div id="film-result">
+    <div id="movies-container">
         <h2>Detalhes do Filme</h2>
-        <img id="film-image" src="" alt="Imagem do Filme" />
-        <p id="film-title"></p>
-        <p id="film-release-date"></p>
-        <p id="film-vote-average"></p>
-        <p id="film-plot"></p>
-        <p id="film-trailer"></p>
+        <div id="film-details">
+            <!-- Detalhes do filme serão exibidos aqui -->
+        </div>
     </div>
 
     <script>
-       async function searchFilm() {
-    const title = document.getElementById('movie-title').value;
-    const res = await fetch(`http://localhost:5500/get_film/${encodeURIComponent(title)}`);
-    
-    if (res.ok) {
-        const data = await res.json();
+       async function searchFilm(title) {
+            try {
+                const response = await fetch(`http://localhost:5500/get_film/${title}`);
+                const data = await response.json();
 
-        // Verificando os dados retornados do backend
-        console.log("Dados recebidos do backend:", data);
-        console.log(data.omdb.poster); // Verifique no backend o valor da URL do pôster
+                if (response.ok) {
+                    const movies = data.movies;
 
-        
-        // Exibe os dados do filme
-        document.getElementById('film-image').src = data.omdb.poster !== 'N/A' ? data.omdb.poster : 'https://via.placeholder.com/200';
-        document.getElementById('film-title').textContent = `Título: ${data.tmdb.title}`;
-        document.getElementById('film-plot').textContent = `Resumo: ${data.tmdb.overview}`;
-        document.getElementById('film-release-date').textContent = `Data de Lançamento: ${data.tmdb.release_date}`;
-        document.getElementById('film-vote-average').textContent = `Avaliação: ${data.tmdb.vote_average}`;
+                    // Atualizar o HTML com os filmes encontrados
+                    const moviesContainer = document.getElementById("film-details");
+                    moviesContainer.innerHTML = ""; // Limpar os resultados anteriores
 
-        // Exibe o trailer, se disponível
-        const trailerLink = data.tmdb.trailer || "Trailer não disponível";
-        document.getElementById('film-trailer').textContent = `Trailer: ${trailerLink}`;
-    } else {
-        alert("Filme não encontrado!");
-    }
-}
+                    movies.forEach(movie => {
+                        const movieElement = document.createElement("div");
+                        movieElement.style.border = "1px solid #ccc";
+                        movieElement.style.padding = "10px";
+                        movieElement.style.margin = "10px";
+                        movieElement.style.maxWidth = "300px";
 
+                        // Verificar se a imagem está disponível ou se é 'N/A'
+                        const posterImage = movie.image !== "Imagem não encontrada" && movie.image !== "N/A" ? movie.image : "https://via.placeholder.com/200";
+
+                        // Verificar se o trailer está disponível e exibir o link
+                        let trailerHTML = "";
+                        if (movie.trailer && movie.trailer.includes("youtube.com")) {
+                            const youtubeId = movie.trailer.split("v=")[1]; // Extrair o ID do YouTube
+                            trailerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                        } else if (movie.trailer && movie.trailer !== "Trailer não disponível" && movie.trailer !== "Erro ao buscar trailer") {
+                            trailerHTML = `<p><a href="${movie.trailer}" target="_blank">Assista ao trailer</a></p>`;
+                        } else {
+                            trailerHTML = "<p>Trailer não disponível.</p>";
+                        }
+
+                        // Montar o HTML para cada filme
+                        movieElement.innerHTML = `
+                            <h3>${movie.title}</h3>
+                            <img src="${posterImage}" alt="${movie.title}" style="max-width: 100%;" />
+                            <p><strong>Sinopse:</strong> ${movie.plot || "Sinopse não disponível."}</p>
+                            <p><strong>Data de lançamento:</strong> ${movie.release_date || "Data não disponível."}</p>
+                            <p><strong>Nota:</strong> ${movie.vote_average || "Nota não disponível."}</p>
+                            <div><strong>Trailer:</strong>${trailerHTML}</div>
+                        `;
+
+                        // Adicionar o filme ao container
+                        moviesContainer.appendChild(movieElement);
+                    });
+                } else {
+                    alert(data.error || "Erro ao buscar os filmes.");
+                }
+            } catch (error) {
+                console.error("Erro no frontend:", error);
+                alert("Erro ao buscar os filmes. Tente novamente mais tarde.");
+            }
+        }
     </script>
-    
 </body>
 </html>
