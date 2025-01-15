@@ -9,12 +9,6 @@ async function getFilm(title) {
         // Faz uma requisição ao endpoint do `connect.js`
         const response = await axios.get(`${BASE_URL}/get_film/${encodeURIComponent(title)}`);
         
-        // Exibe os dados do filme retornados pelo servidor
-        console.log("Filme encontrado:");
-        console.log(`Título: ${response.data.title}`);
-        console.log(`Resumo: ${response.data.plot}`);
-        console.log(`Trailer: ${response.data.trailer}`);
-        console.log(`Imagem: ${response.data.image}`);
     } catch (error) {
         if (error.response && error.response.status === 404) {
             console.log("Filme não encontrado.");
